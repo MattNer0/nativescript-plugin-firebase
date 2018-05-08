@@ -69,6 +69,10 @@ function addBackgroundRemoteNotificationHandler(appDelegate) {
 }
 
 firebase.addAppDelegateMethods = appDelegate => {
+  let previousApplicationDidFinishLaunchingWithOptions;
+  if (appDelegate.prototype.applicationDidFinishLaunchingWithOptions) {
+    previousApplicationDidFinishLaunchingWithOptions = appDelegate.prototype.applicationDidFinishLaunchingWithOptions;
+  }
   // we need the launchOptions for this one so it's a bit hard to use the UIApplicationDidFinishLaunchingNotification pattern we're using for other things
   appDelegate.prototype.applicationDidFinishLaunchingWithOptions = (application, launchOptions) => {
     if (!firebase._configured) {
@@ -85,6 +89,9 @@ firebase.addAppDelegateMethods = appDelegate => {
     // Firebase Facebook authentication
     if (typeof(FBSDKApplicationDelegate) !== "undefined") {
       FBSDKApplicationDelegate.sharedInstance().applicationDidFinishLaunchingWithOptions(application, launchOptions);
+    }
+    if (previousApplicationDidFinishLaunchingWithOptions) {
+      return previousApplicationDidFinishLaunchingWithOptions(application, launchOptions);
     }
     return true;
   };
